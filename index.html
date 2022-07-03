@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Static Template</title>
+
+    <!--<script src="https://unpkg.com/vue@next"></script>-->
+    <!--<script
+      src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.24/vue.global.min.js"
+      integrity="sha512-9jzR+CDYy4G7ItNUoOCTinMd8prDY+SXLRgg4+JB8AdYKEtLrIWVwLjPYHHLt3MNnYXMkA2spt4VaUE55O9Qnw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>-->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.2.37/vue.global.min.js"
+      integrity="sha512-rCO3ZZnxh9j/Y725Iq2Cqr2lc9fi83zVeN3PFTUosktylZsCFjD13PDbKrzKjKO/idjM4KlMQC52AsoGFTAe6A=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <script src="iframeResizer.contentWindow.min.js"></script>
+    <!--<script src="https://unpkg.com/vue/dist/vue.js"></script>-->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/bootstrap/3.3.5/css/bootstrap.min.css"
+    />
+    <!--
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/animatecss/3.5.1/animate.min.css"
+    />-->
+
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="addanimation.css" />
+    <!--<link rel="stylesheet" href="acuvue2021.css" />
+    <link rel="stylesheet" href="marykay2020.css" />-->
+    <style>
+      .typical-test .quest_box .quest_count {
+        /*background: v-bind("url(" + imgpath + "images/bg_counter.png)") 50% 50%
+          no-repeat;*/
+        background-image: v-bind("url(" + imgpath + ")");
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="hello-vue" class="implantWrapper">
+      <div class="typical-test">
+        <div class="hello_page" v-if="status=='intro'">
+          <div class="imgbox">
+            <!--<img src="images/main.jpg" class="img-responsive" />-->
+          </div>
+          <div class="prehead">
+            «Выберите наиболее полезный продукт»
+          </div>
+          <p>
+            Хотите проверить, хорошо ли вы разбираетесь в составе привычных
+            продуктов и сможете ли выбрать продукт без сахара? <br />Начнем!
+          </p>
+          {{questnum}}
+          <a
+            href="#"
+            class="btn_style animated pulse infinite"
+            v-on:click="status = 'waiting'"
+            >НАЧАТЬ ТЕСТ</a
+          >
+        </div>
+
+        <div class="test" v-if="status == 'waiting' || status == 'answered'">
+          <div class="quest_box">
+            <div class="imgbox">
+              <div class="quest_count">
+                {{questnum+1}}/<b>{{questions.length}}</b>
+              </div>
+              <img
+                :src="imgpath + 'images/q' + (questnum+1) +'.png'"
+                class="img-responsive"
+              />
+            </div>
+
+            <div class="quest_head">
+              <span v-html="questions[questnum].quest"></span>
+            </div>
+
+            <div
+              class="answ_box animated"
+              :class="{iswaiting: status=='waiting'}"
+            >
+              <div
+                class="answ_txt animateditem"
+                v-for="(answer, index) in questions[questnum].answers"
+                cclass="{active: answerNum == index}"
+                :class="{ success: answer.score == 1 && status=='answered', mistake: index == lastAnsweredIndex && answer.score == 0 }"
+                v-on:click="enableNext( answer, index )"
+              >
+                <div class="wrap">
+                  <span class="num">{{['A','Б','В'][index]}}:&nbsp;</span>
+                  <span class="txt" v-html="answer.text"></span>
+                </div>
+              </div>
+            </div>
+
+            <div class="stepbox">
+              <div
+                class="step"
+                v-for="question in questions"
+                cclass="{active: index == questnum, done: index < questnum}"
+              ></div>
+            </div>
+          </div>
+
+          <!--div class="test_num"><span class="active">{{ state.questNum + 1 }}</span> <span class="h_line">/</span> <span class="all_num">5</span></div-->
+        </div>
+
+        <div class="result" v-if="status == 'result'">
+          <div class="result_box">
+            <div class="svg_head">
+              <img
+                :src='imgpath + "images/result_head.svg"'
+                class="img-responsive desk"
+              />
+              <img
+                :src='imgpath + "images/result_head_m.svg"'
+                class="img-responsive mobi"
+              />
+            </div>
+            <!--<div class="quest_head">ТВОЙ РЕЗУЛЬТАТ {{resultNum}}</div>-->
+
+            <div class="reshead" v-html="resultsFin[resultNum].head"></div>
+
+            <div class="restext" v-html="resultsFin[resultNum].text"></div>
+
+            <div class="imgbox">
+              <div class="img">
+                <img
+                  src='imgpath + "images/result.png"'
+                  class="img-responsive"
+                />
+              </div>
+              <div class="logo">
+                <img src='imgpath + "images/logo.png"' class="img-responsive" />
+              </div>
+            </div>
+
+            <div class="resbold" v-html="resultsFin[resultNum].text2"></div>
+
+            <div class="stepbox"></div>
+            <div class="promotext">
+              Используй промокод <span>COSMO</span> для получения 25%-ной скидки
+              на сайте «Победы».
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script setup>
+      //const color = ref("red");
+      const imgpath = "url(lala.png)";
+      const HelloVueApp = {
+        data() {
+          return {
+            imgpath: "https://sp.imweb.ru/implant/sp/pobeda2022/",
+            counter: 0,
+            currentCss: "",
+
+            cssAr: ["acuvue2021", "marykay2020", "cherkizovo2020"],
+
+            //------------------
+            status: "waiting",
+            questnum: 0,
+            answers: [],
+            resultNum: 0,
+            lastAnsweredIndex: -1,
+            results: [],
+
+            type: "byRange", // byScore (какой score чаще всего повторился в ответах), byRange (сумма score попадает в интервал)
+            range: {
+              3: { lessEqual: -1000, moreEqual: 3 }, //resultNum: {lessEqual:, moreEqual:}
+              2: { lessEqual: 4, moreEqual: 5 },
+              1: { lessEqual: 6, moreEqual: 7 }
+            },
+            questions: [
+              {
+                quest:
+                  "Мистическое Эльдорадо, кофе и&nbsp;кондор, одна из&nbsp;самых крупных птиц в&nbsp;мире,&nbsp;&mdash; это...",
+                answers: [
+                  { score: 1, text: "Колумбия" },
+                  { score: 0, text: "Бразилия" },
+                  { score: 0, text: "Венесуэла" }
+                ]
+              },
+
+              {
+                quest:
+                  "Пальмы, пляжи с&nbsp;белоснежным песком и&nbsp;Карибское море встречаются&nbsp;в...",
+                answers: [
+                  {
+                    score: 0,
+                    text: "Таиланде"
+                  },
+                  {
+                    score: 1,
+                    text: "Доминикане"
+                  },
+                  {
+                    score: 0,
+                    text: "Греции"
+                  }
+                ]
+              },
+
+              {
+                quest:
+                  "Африка, замки, гепарды&nbsp;&mdash; так можно описать...",
+                answers: [
+                  {
+                    score: 0,
+                    text: "Парагвай"
+                  },
+                  {
+                    score: 0,
+                    text: "Аргентину"
+                  },
+                  {
+                    score: 1,
+                    text: "Гану"
+                  }
+                ]
+              },
+              {
+                quest:
+                  "Страна, в&nbsp;которой есть каучук, ананасы и&nbsp;французский язык,&nbsp;&mdash; это",
+                answers: [
+                  {
+                    score: 0,
+                    text: "Франция"
+                  },
+                  {
+                    score: 1,
+                    text: "Кот-д'Ивуар"
+                  },
+                  {
+                    score: 0,
+                    text: "Мексика"
+                  }
+                ]
+              },
+
+              {
+                quest:
+                  "Похвастаться ванилью, изобилием лемуров и&nbsp;лечебных растений под силу...",
+                answers: [
+                  {
+                    score: 0,
+                    text: "Португалии"
+                  },
+                  {
+                    score: 0,
+                    text: "Германии"
+                  },
+                  {
+                    score: 1,
+                    text: "Мадагаскару"
+                  }
+                ]
+              },
+              {
+                quest:
+                  "Микс из&nbsp;самого высокого в&nbsp;мире действующего вулкана, нефти и&nbsp;шоколада&nbsp;&mdash; главные характеристики...",
+                answers: [
+                  {
+                    score: 1,
+                    text: "Эквадора"
+                  },
+                  {
+                    score: 0,
+                    text: "Вьетнама"
+                  },
+                  {
+                    score: 0,
+                    text: "Индонезии"
+                  }
+                ]
+              },
+
+              {
+                quest:
+                  "Погладить альпака, надеть яркий национальный костюм и&nbsp;насладиться какао-бобами можно&nbsp;в...",
+                answers: [
+                  {
+                    score: 0,
+                    text: "Иордании"
+                  },
+                  {
+                    score: 1,
+                    text: "Перу"
+                  },
+                  {
+                    score: 0,
+                    text: "Японии"
+                  }
+                ]
+              }
+            ],
+
+            resultsFin: [
+              {
+                head: "Ты – настоящий натуралист! ",
+                text:
+                  "Легко отличить одну страну от&nbsp;другой, назвать ее&nbsp;географических соседей и&nbsp;особенности национального характера&nbsp;&mdash; все это лишь немногие из&nbsp;твоих способностей. Тебе нравится постоянно изучать новое, путешествовать и&nbsp;получать яркие эмоции. Вдохновением может стать все что угодно&nbsp;&mdash; в&nbsp;том числе необычные вкусы!",
+                text2:
+                  "Линейка премиального шоколада Single Origin &laquo;Победа&raquo; поможет моментально телепортироваться в&nbsp;Колумбию, Доминикану или Мадагаскар из&nbsp;дома, очереди или по&nbsp;пути на&nbsp;встречу к&nbsp;подругам. Тебе остается только запомнить это ощущение и&nbsp;использовать его в&nbsp;качестве вдохновения для будущих начинаний."
+              },
+
+              {
+                head: "Твоему пытливому уму еще многое предстоит узнать!",
+                text:
+                  "Ты&nbsp;уже во&nbsp;многом разбираешься, но&nbsp;все время жаждешь свежего опыта. Поэтому все самые интересные видео о&nbsp;разных странах, информационные каналы и&nbsp;Instagram-профили у&nbsp;тебя на&nbsp;карандаше. Но&nbsp;мало одной насыщенной картинки&nbsp;&mdash; нужен эффект присутствия!",
+                text2:
+                  "Почувствовать теплый бриз на&nbsp;пляже Доминиканы, аромат мадагаскарской ванили и&nbsp;волнение на&nbsp;сафари в&nbsp;Гане можно без лишних движений&nbsp;&mdash; коллекция шоколада Single Origin &laquo;Победы&raquo; поможет окунуться в&nbsp;это путешествие. Нужно просто выбрать именно ту&nbsp;плитку, которая подходит к&nbsp;твоему настроению прямо здесь и&nbsp;сейчас."
+              },
+
+              {
+                head: "Ты в самом начале пути!",
+                text:
+                  "Ох, как мы&nbsp;тебе завидуем! Ты&nbsp;в&nbsp;отправной точке безумно интересного странствия в&nbsp;захватывающий мир знаний. Только выбери подходящий для себя источник&nbsp;&mdash; книги, подкасты или видео. Так информация будет захватывать каждую клеточку и&nbsp;не&nbsp;придется ничего специально запоминать&nbsp;&mdash; все само отложится в&nbsp;памяти.",
+                text2:
+                  "Даже если пока нет возможности съездить в&nbsp;интересующие точки, можно уже сейчас попробовать их&nbsp;на&nbsp;вкус. Помощник в&nbsp;этом деле&nbsp;&mdash; коллекция Single Origin &laquo;Победы&raquo;. Молочный и&nbsp;горький шоколад с&ccedil;разнообразными ингредиентами, характеризующими Перу, Колумбию, Гану и&nbsp;другие необычные локации, за&nbsp;пару мгновений перенесет в&nbsp;их&nbsp;аутентичную атмосферу."
+              }
+            ]
+          };
+        },
+        methods: {
+          logIt() {
+            console.log("messageHTML" + this.messageHTML);
+          },
+
+          enableNext(answer, index, e) {
+            console.log("answered", answer);
+            console.log("answeredindex", index);
+            if (this.status == "waiting") {
+              //console.log("ene", num);
+              this.status = "answered";
+              this.lastAnsweredIndex = index;
+              setTimeout(() => {
+                this.handleAnswerClick(answer, e);
+              }, 1500);
+            }
+          },
+
+          lala() {
+            //
+          },
+
+          handleAnswerClick(answ, e) {
+            this.status = "waiting";
+            this.lastAnsweredIndex = -1; //just reset
+            console.log("hac");
+            this.questnum =
+              this.questnum < this.questions.length - 1
+                ? this.questnum + 1
+                : this.questnum;
+            console.log("this.questnum", this.questnum);
+            this.answers =
+              this.answers.length < this.questions.length
+                ? [...this.answers, answ.score]
+                : this.answers;
+            console.log("this.answers", this.answers);
+            this.checkShowResult();
+          },
+
+          checkShowResult() {
+            console.log("csr");
+            if (this.answers.length === this.questions.length) {
+              var results = {
+                max: { score: 0, count: 0 },
+                sameAnswer: {},
+                scoreSum: 0
+              };
+
+              console.log("results", results);
+              this.answers.forEach(function (score, questNum) {
+                score = parseInt(score, 10) || 0;
+                console.log("results", results);
+                results.scoreSum += score;
+                console.log("results", results);
+
+                // Сколько раз повторился
+                results.sameAnswer[score] = results.sameAnswer[score] || 0; //инитим если нет
+                results.sameAnswer[score]++;
+
+                if (results.sameAnswer[score] > results.max.count) {
+                  results.max.count = results.sameAnswer[score];
+                  results.max.score = score; // Больше всего повторений
+                }
+              });
+
+              if (this.type === "byScore") {
+                //setResultnum(results.max.score);
+                resultNum = results.max.score;
+              } else if (this.type === "byRange") {
+                console.log("BYRANGE");
+                Object.values(this.range).forEach((range, resultNum) => {
+                  console.log("resultNum", resultNum);
+                  if (
+                    //range.lessEqual &&
+                    //range.moreEqual &&
+                    results.scoreSum >= range.lessEqual &&
+                    results.scoreSum <= range.moreEqual
+                  ) {
+                    //setResultnum(resultNum);
+                    console.log(resultNum);
+                    this.resultNum = resultNum;
+                  }
+                });
+              }
+
+              //setStatus("result");
+              console.log("SETSTAT");
+              this.status = "result";
+            }
+          },
+
+          appendFile(filestr) {
+            if (this.currentCss != "") {
+              console.log("do");
+              this.currentCss.parentNode.removeChild(this.currentCss);
+              console.log("af");
+            }
+            let file = document.createElement("link");
+            file.rel = "stylesheet";
+            file.href =
+              "https://sp.imweb.ru/implant/sp/" +
+              filestr +
+              "/templates/default/iframe/iframe.css"; //"myfile.css";
+            document.head.appendChild(file);
+            this.currentCss = file;
+            console.log("filestr", filestr);
+          },
+
+          restart(e) {
+            e.preventDefault();
+
+            this.status = "intro";
+            this.resultNum = 0;
+            this.answers = [];
+            this.questnum = 0;
+          }
+        },
+        mounted() {
+          setInterval(() => {
+            this.counter++;
+          }, 1000);
+        }
+      };
+      Vue.createApp(HelloVueApp).mount("#hello-vue");
+    </script>
+  </body>
+</html>
