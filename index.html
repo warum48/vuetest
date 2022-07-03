@@ -36,13 +36,6 @@
     <link rel="stylesheet" href="addanimation.css" />
     <!--<link rel="stylesheet" href="acuvue2021.css" />
     <link rel="stylesheet" href="marykay2020.css" />-->
-    <style>
-      .typical-test .quest_box .quest_count {
-        /*background: v-bind("url(" + imgpath + "images/bg_counter.png)") 50% 50%
-          no-repeat;*/
-        background-image: v-bind("url(" + imgpath + ")");
-      }
-    </style>
   </head>
 
   <body>
@@ -91,7 +84,6 @@
               <div
                 class="answ_txt animateditem"
                 v-for="(answer, index) in questions[questnum].answers"
-                cclass="{active: answerNum == index}"
                 :class="{ success: answer.score == 1 && status=='answered', mistake: index == lastAnsweredIndex && answer.score == 0 }"
                 v-on:click="enableNext( answer, index )"
               >
@@ -103,11 +95,7 @@
             </div>
 
             <div class="stepbox">
-              <div
-                class="step"
-                v-for="question in questions"
-                cclass="{active: index == questnum, done: index < questnum}"
-              ></div>
+              <div class="step" v-for="question in questions"></div>
             </div>
           </div>
 
@@ -135,12 +123,15 @@
             <div class="imgbox">
               <div class="img">
                 <img
-                  src='imgpath + "images/result.png"'
+                  :src='imgpath + "images/result.png"'
                   class="img-responsive"
                 />
               </div>
               <div class="logo">
-                <img src='imgpath + "images/logo.png"' class="img-responsive" />
+                <img
+                  :src='imgpath + "images/logo.png"'
+                  class="img-responsive"
+                />
               </div>
             </div>
 
@@ -157,8 +148,6 @@
     </div>
 
     <script setup>
-      //const color = ref("red");
-      const imgpath = "url(lala.png)";
       const HelloVueApp = {
         data() {
           return {
@@ -335,14 +324,14 @@
         },
         methods: {
           logIt() {
-            console.log("messageHTML" + this.messageHTML);
+            //console.log("messageHTML" + this.messageHTML);
           },
 
           enableNext(answer, index, e) {
-            console.log("answered", answer);
-            console.log("answeredindex", index);
+            //console.log("answered", answer);
+            //console.log("answeredindex", index);
             if (this.status == "waiting") {
-              //console.log("ene", num);
+              ////console.log("ene", num);
               this.status = "answered";
               this.lastAnsweredIndex = index;
               setTimeout(() => {
@@ -351,29 +340,25 @@
             }
           },
 
-          lala() {
-            //
-          },
-
           handleAnswerClick(answ, e) {
             this.status = "waiting";
             this.lastAnsweredIndex = -1; //just reset
-            console.log("hac");
+            //console.log("hac");
             this.questnum =
               this.questnum < this.questions.length - 1
                 ? this.questnum + 1
                 : this.questnum;
-            console.log("this.questnum", this.questnum);
+            //console.log("this.questnum", this.questnum);
             this.answers =
               this.answers.length < this.questions.length
                 ? [...this.answers, answ.score]
                 : this.answers;
-            console.log("this.answers", this.answers);
+            //console.log("this.answers", this.answers);
             this.checkShowResult();
           },
 
           checkShowResult() {
-            console.log("csr");
+            //console.log("csr");
             if (this.answers.length === this.questions.length) {
               var results = {
                 max: { score: 0, count: 0 },
@@ -381,12 +366,12 @@
                 scoreSum: 0
               };
 
-              console.log("results", results);
+              //console.log("results", results);
               this.answers.forEach(function (score, questNum) {
                 score = parseInt(score, 10) || 0;
-                console.log("results", results);
+                //console.log("results", results);
                 results.scoreSum += score;
-                console.log("results", results);
+                //console.log("results", results);
 
                 // Сколько раз повторился
                 results.sameAnswer[score] = results.sameAnswer[score] || 0; //инитим если нет
@@ -402,9 +387,9 @@
                 //setResultnum(results.max.score);
                 resultNum = results.max.score;
               } else if (this.type === "byRange") {
-                console.log("BYRANGE");
+                //console.log("BYRANGE");
                 Object.values(this.range).forEach((range, resultNum) => {
-                  console.log("resultNum", resultNum);
+                  //console.log("resultNum", resultNum);
                   if (
                     //range.lessEqual &&
                     //range.moreEqual &&
@@ -412,23 +397,23 @@
                     results.scoreSum <= range.moreEqual
                   ) {
                     //setResultnum(resultNum);
-                    console.log(resultNum);
+                    //console.log(resultNum);
                     this.resultNum = resultNum;
                   }
                 });
               }
 
               //setStatus("result");
-              console.log("SETSTAT");
+              //console.log("SETSTAT");
               this.status = "result";
             }
           },
 
           appendFile(filestr) {
             if (this.currentCss != "") {
-              console.log("do");
+              //console.log("do");
               this.currentCss.parentNode.removeChild(this.currentCss);
-              console.log("af");
+              //console.log("af");
             }
             let file = document.createElement("link");
             file.rel = "stylesheet";
@@ -438,7 +423,7 @@
               "/templates/default/iframe/iframe.css"; //"myfile.css";
             document.head.appendChild(file);
             this.currentCss = file;
-            console.log("filestr", filestr);
+            //console.log("filestr", filestr);
           },
 
           restart(e) {
